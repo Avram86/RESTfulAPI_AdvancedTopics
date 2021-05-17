@@ -1,6 +1,7 @@
 ﻿using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Entities;
 using Microsoft.EntityFrameworkCore;
+using RESTfulAPI_Aync.Helpers;
 using RESTfulAPI_Pluralsight.ResourceParameters;
 using System;
 using System.Collections.Generic;
@@ -133,19 +134,20 @@ namespace CourseLibrary.API.Services
         }
 
         //added for filtering
-        public async Task<IEnumerable<Author>> GetAuthorsAsync(
+        public async Task<PagedList<Author>> GetAuthorsAsync(
             AuthorsResourceParameters authorsResourceParameters)
         {
-            if (authorsResourceParameters==null)
-            {
-                return await GetAuthorsAsync();
-            }
+            //if (authorsResourceParameters==null)
+            //{
+            //    return await GetAuthorsAsync();
+            //}
 
-            if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory) 
-                && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
-            {
-                return await GetAuthorsAsync();
-            }
+            //uncomment if we want to load without pagination
+            //if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory) 
+            //    && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
+            //{
+            //    return await GetAuthorsAsync();
+            //}
 
             var collection = _context.Authors as IQueryable<Author>;
 
@@ -162,7 +164,9 @@ namespace CourseLibrary.API.Services
                                                  || a.FirstName.Contains(searchQuery)
                                                  || a.LastName.Contains(searchQuery));
             }
-            return await collection.ToListAsync();
+            return await PagedList<Author>.Create(collection,
+                authorsResourceParameters.PageNumber,
+                authorsResourceParameters.PageSize);
 
         }
 

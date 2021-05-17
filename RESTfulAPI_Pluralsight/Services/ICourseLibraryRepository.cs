@@ -1,4 +1,5 @@
 ﻿using CourseLibrary.API.Entities;
+using RESTfulAPI_Aync.Helpers;
 using RESTfulAPI_Pluralsight.ResourceParameters;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace CourseLibrary.API.Services
 
 
         Task<IEnumerable<Author>> GetAuthorsAsync();
-        Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters);
+        Task<PagedList<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters);
         Task<Author> GetAuthorAsync(Guid authorId);
         Task<IEnumerable<Author>> GetAuthorsAsync(IEnumerable<Guid> authorIds);
 
