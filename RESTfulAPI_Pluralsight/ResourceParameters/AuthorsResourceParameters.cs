@@ -19,6 +19,8 @@ namespace RESTfulAPI_Pluralsight.ResourceParameters
         {
             get => _pagesize;
             set => _pagesize = (value > maxPageSize) ? maxPageSize : value;
-        } 
+        }
+
+        public string OrderBy { get; set; } = "Name";
     }
 }

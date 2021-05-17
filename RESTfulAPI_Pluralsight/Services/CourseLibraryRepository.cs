@@ -151,12 +151,14 @@ namespace CourseLibrary.API.Services
 
             var collection = _context.Authors as IQueryable<Author>;
 
+            //filtering
             if (!string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory))
             {
                 var mainCategory = authorsResourceParameters.MainCategory.Trim();
                 collection = collection.Where(a => a.MainCategory == mainCategory);
             }
 
+            //searching
             if (!string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
             {
                 var searchQuery = authorsResourceParameters.SearchQuery.Trim();
@@ -164,6 +166,18 @@ namespace CourseLibrary.API.Services
                                                  || a.FirstName.Contains(searchQuery)
                                                  || a.LastName.Contains(searchQuery));
             }
+
+            //ordering:by name
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.OrderBy))
+            {
+                if (authorsResourceParameters.OrderBy.ToLowerInvariant() == "name")
+                {
+                    collection = collection.OrderBy(a => a.FirstName).ThenBy(a => a.LastName);
+                }
+
+               // collection.ApplySort(authorsResourceParameters.OrderBy, _mappingDictionary);
+            }
+
             return await PagedList<Author>.Create(collection,
                 authorsResourceParameters.PageNumber,
                 authorsResourceParameters.PageSize);
