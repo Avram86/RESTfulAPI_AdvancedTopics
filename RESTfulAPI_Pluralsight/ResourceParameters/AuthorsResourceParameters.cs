@@ -22,5 +22,7 @@ namespace RESTfulAPI_Pluralsight.ResourceParameters
         }
 
         public string OrderBy { get; set; } = "LastName";
+
+        public string Fields { get; set; }
     }
 }
