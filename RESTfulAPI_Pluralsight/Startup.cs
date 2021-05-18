@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using RESTfulAPI_Aync.Services;
 using System;
 
 namespace CourseLibrary.API
@@ -34,7 +35,10 @@ namespace CourseLibrary.API
                 .AddXmlDataContractSerializerFormatters();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-             
+
+
+            //register PropertyMappingService
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
 
             var connectionString = Configuration["ConnectionStrings:connectionString"];
