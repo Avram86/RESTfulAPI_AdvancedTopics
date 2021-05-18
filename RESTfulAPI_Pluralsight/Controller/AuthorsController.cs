@@ -21,12 +21,15 @@ namespace RESTfulAPI_Pluralsight.Controller
         private readonly ICourseLibraryRepository _courseLibraryRepository;
         private readonly IMapper _mapper;
         private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _propertyCheckerService;
 
-        public AuthorsController(ICourseLibraryRepository courseLibraryRepository, IMapper mapper, IPropertyMappingService propertyMappingService)
+        public AuthorsController(ICourseLibraryRepository courseLibraryRepository, IMapper mapper, IPropertyMappingService propertyMappingService,
+            IPropertyCheckerService propertyCheckerService)
         {
             _courseLibraryRepository = courseLibraryRepository ?? throw new ArgumentNullException(nameof(courseLibraryRepository));
             _mapper = mapper;
             _propertyMappingService = propertyMappingService;
+            _propertyCheckerService = propertyCheckerService;
         }
 
         [HttpGet(Name ="GetAuthors")]
@@ -35,6 +38,11 @@ namespace RESTfulAPI_Pluralsight.Controller
             [FromQuery]AuthorsResourceParameters authorsResourceParameters)
         {
             if(!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Author>(authorsResourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_propertyCheckerService.TypeHasProperties<AuthorDto>(authorsResourceParameters.Fields))
             {
                 return BadRequest();
             }
@@ -61,8 +69,13 @@ namespace RESTfulAPI_Pluralsight.Controller
         }
 
         [HttpGet("{authorId:guid}", Name ="GetAuthor")]
-        public async Task<ActionResult<AuthorDto>> GetAuthorAsync(Guid authorId)
+        public async Task<IActionResult> GetAuthorAsync(Guid authorId, string fields)
         {
+            if (!_propertyCheckerService.TypeHasProperties<AuthorDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var authorFromRepo =await _courseLibraryRepository.GetAuthorAsync(authorId);
 
             if (authorFromRepo == null)
@@ -70,7 +83,7 @@ namespace RESTfulAPI_Pluralsight.Controller
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
+            return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData(fields));
         }
 
         [HttpPost]
