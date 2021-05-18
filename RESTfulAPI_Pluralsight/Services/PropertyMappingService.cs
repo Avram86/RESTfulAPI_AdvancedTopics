@@ -25,6 +25,31 @@ namespace RESTfulAPI_Aync.Services
         {
             _propertyMappings.Add(new PropertyMapping<AuthorDto, Author>(_authorPropertyMapping));
         }
+
+        public bool ValidMappingExistsFor<TSource, TDestination>(string fields)
+        {
+            var propertyMapping = GetPropertyMapping<TSource, TDestination>();
+
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                return true;
+            }
+
+            var filedAfterSplit = fields.Split(",");
+            foreach(var field in filedAfterSplit)
+            {
+                var trimmedFiled = field.Trim();
+
+                var indexOfFirstSpace = trimmedFiled.IndexOf(" ");
+                var propertyName = (indexOfFirstSpace == -1) ? trimmedFiled : trimmedFiled.Remove(indexOfFirstSpace);
+
+                if (!propertyMapping.ContainsKey(propertyName))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
         public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
         {
             //get matching mapping

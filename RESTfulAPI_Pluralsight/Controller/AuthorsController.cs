@@ -3,6 +3,7 @@ using CourseLibrary.API.Entities;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using RESTfulAPI_Aync.Helpers;
+using RESTfulAPI_Aync.Services;
 using RESTfulAPI_Pluralsight.Models;
 using RESTfulAPI_Pluralsight.ResourceParameters;
 using System;
@@ -19,11 +20,13 @@ namespace RESTfulAPI_Pluralsight.Controller
     {
         private readonly ICourseLibraryRepository _courseLibraryRepository;
         private readonly IMapper _mapper;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public AuthorsController(ICourseLibraryRepository courseLibraryRepository, IMapper mapper)
+        public AuthorsController(ICourseLibraryRepository courseLibraryRepository, IMapper mapper, IPropertyMappingService propertyMappingService)
         {
             _courseLibraryRepository = courseLibraryRepository ?? throw new ArgumentNullException(nameof(courseLibraryRepository));
             _mapper = mapper;
+            _propertyMappingService = propertyMappingService;
         }
 
         [HttpGet(Name ="GetAuthors")]
@@ -31,6 +34,11 @@ namespace RESTfulAPI_Pluralsight.Controller
             //for filtering
             [FromQuery]AuthorsResourceParameters authorsResourceParameters)
         {
+            if(!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Author>(authorsResourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
             var authorsFromRepo =await _courseLibraryRepository.GetAuthorsAsync(authorsResourceParameters);
 
             var previousPagedLink = authorsFromRepo.HasPrevious ? CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage) : null;
